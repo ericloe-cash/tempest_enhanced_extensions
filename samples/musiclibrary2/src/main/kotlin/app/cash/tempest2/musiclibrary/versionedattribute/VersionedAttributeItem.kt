@@ -46,6 +46,24 @@ class VersionedAttributeItem {
 
   var description: String? = null
 
+  // For async parallel writes test to track consistent time
+  // stamps and version across async coroutines.
+  var one_version: Long? = null
+  var one_created_at_instant: Instant? = null
+  var one_updated_at_instant: Instant? = null
+
+  var two_version: Long? = null
+  var two_created_at_instant: Instant? = null
+  var two_updated_at_instant: Instant? = null
+
+  var three_version: Long? = null
+  var three_created_at_instant: Instant? = null
+  var three_updated_at_instant: Instant? = null
+
+  var four_version: Long? = null
+  var four_created_at_instant: Instant? = null
+  var four_updated_at_instant: Instant? = null
+
   companion object {
     const val TABLE_NAME = "versioned_attributes"
   }

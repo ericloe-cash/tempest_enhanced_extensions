@@ -6,6 +6,7 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 import java.util.Date
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -20,21 +21,20 @@ fun runBlockingTest(block: suspend CoroutineScope.() -> Unit) {
  * Test should use [getInstant] et al. to read the current time without ticking the clock.
  */
 class FakeClock(val tickOnNow: Duration = 0.seconds) : Clock() {
-  private var epochNow = 452_001_600_000
+  private var epochNow = AtomicLong(452_001_600_000)
 
   fun add(duration: Duration) {
-    epochNow += duration.inWholeMilliseconds
+    epochNow.addAndGet(duration.inWholeMilliseconds)
   }
 
-  fun getInstant() = Instant.ofEpochMilli(epochNow)
+  fun getInstant() = Instant.ofEpochMilli(epochNow.get())
 
-  fun getDate() = Date.from(Instant.ofEpochMilli(epochNow))
+  fun getDate() = Date.from(Instant.ofEpochMilli(epochNow.get()))
 
-  fun minusTicks(ticks: Int) = Instant.ofEpochMilli(epochNow - (ticks * tickOnNow.inWholeMilliseconds))
+  fun minusTicks(ticks: Int) = Instant.ofEpochMilli(epochNow.addAndGet(-(ticks * tickOnNow.inWholeMilliseconds)))
 
   override fun instant(): Instant {
-    epochNow += tickOnNow.inWholeMilliseconds
-    return Instant.ofEpochMilli(epochNow)
+    return Instant.ofEpochMilli(epochNow.addAndGet(tickOnNow.inWholeMilliseconds))
   }
 
   override fun withZone(zone: ZoneId?): Clock =
